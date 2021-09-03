@@ -69,7 +69,7 @@ class TaskAsync < Task
 end
 
 class TaskManagerAsync < TaskManager
-	def initialize( numOfThread = getNumberOfProcessor() )
+	def initialize( numOfThread = TaskManagerAsync.getNumberOfProcessor() )
 		@tasks = []
 		@numOfThread = numOfThread
 		@currentRunningTasks = 0
@@ -152,7 +152,7 @@ class TaskManagerAsync < TaskManager
 		numOfProcessor = ENV['NUMBER_OF_PROCESSORS']
 		if !numOfProcessor then
 			# try as Linux
-			exec_cmd = "cat /proc/cpuinfo | grep bogomips | wc -l 2> /dev/null"
+			exec_cmd = "cat /proc/cpuinfo 2> /dev/null | grep bogomips | wc -l"
 			IO.popen(exec_cmd, "r") {|io|
 				while !io.eof? do
 					numOfProcessor= io.readline.strip.to_i
