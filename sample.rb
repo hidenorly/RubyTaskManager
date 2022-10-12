@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require './TaskManager'
+require_relative 'TaskManager'
 
 class SampleTask < TaskAsync
 	def initialize(key, resultCollector)
@@ -66,3 +66,17 @@ taskMan.addTask( SampleTask.new( "thread4", result ) )
 taskMan.executeAll()
 taskMan.finalize()
 result.dump()
+
+
+
+threadPool = ThreadPool.new()
+result2 = ResultCollector.new()
+threadPool.addTask( SampleTask.new( "task1", result2 ) )
+threadPool.addTask( SampleTask.new( "task2", result2 ) )
+threadPool.addTask( SampleTask.new( "task3", result2 ) )
+threadPool.addTask( SampleTask.new( "task4", result2 ) )
+
+threadPool.executeAll()
+threadPool.finalize()
+result2.dump()
+
