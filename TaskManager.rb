@@ -1,4 +1,4 @@
-#  Copyright (C) 2021 hidenorly
+#  Copyright (C) 2021, 2022 hidenorly
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -314,5 +314,59 @@ class ThreadPool
 		@threads.each do |aTaskExecutor|
 			aTaskExecutor.terminate()
 		end
+	end
+end
+
+class ResultCollector
+	def initialize(  )
+		@result = []
+		@_mutex = Mutex.new
+	end
+
+	def onResult( id, result )
+		@_mutex.synchronize {
+			if result.kind_of?(Array) then
+				@result = @result | result
+			else
+				@result << result
+			end
+		}
+	end
+
+	def report()
+		@_mutex.synchronize {
+			@result.each do | aResult |
+				puts "#{aResult}"
+			end
+		}
+	end
+
+	def getResult()
+		result = nil
+		@_mutex.synchronize {
+			result = @result.clone()
+		}
+		return result
+	end
+end
+
+class ResultCollectorHash < ResultCollector
+	def initialize(  )
+		super()
+		@result = {}
+	end
+
+	def onResult( id, result )
+		@_mutex.synchronize {
+			@result[ id ] = result
+		}
+	end
+
+	def report()
+		@_mutex.synchronize {
+			@result.each do | id, aResult |
+				puts "#{id} : #{aResult}"
+			end
+		}
 	end
 end
