@@ -13,21 +13,6 @@ class TestTask < TaskAsync
 	end
 end
 
-class ResultCollector
-	def initialize
-		@result = {}
-		@_mutex = Mutex.new
-	end
-	def onResult( id, result )
-		@_mutex.synchronize {
-			@result[ id ] = result
-		}
-	end
-	def getResult
-		return @result
-	end
-end
-
 
 class TestTaskManager < Minitest::Test
 	def setup
@@ -40,6 +25,22 @@ class TestTaskManager < Minitest::Test
 		puts "test_TaskManager"
 		resultCollector = ResultCollector.new()
 		taskMan = TaskManagerAsync.new()
+		taskMan.addTask( TestTask.new( "thread1", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread2", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread3", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread4", resultCollector ) )
+
+		taskMan.executeAll()
+		taskMan.finalize()
+
+		result = resultCollector.getResult()
+		assert_equal 4, result.length
+	end
+
+	def test_ThreadPool
+		puts "test_ThreadPool"
+		resultCollector = ResultCollector.new()
+		taskMan = ThreadPool.new()
 		taskMan.addTask( TestTask.new( "thread1", resultCollector ) )
 		taskMan.addTask( TestTask.new( "thread2", resultCollector ) )
 		taskMan.addTask( TestTask.new( "thread3", resultCollector ) )
