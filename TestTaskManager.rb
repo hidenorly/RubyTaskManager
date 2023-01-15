@@ -24,14 +24,19 @@ class TestTaskManager < Minitest::Test
 	def test_TaskManager
 		puts "test_TaskManager"
 		resultCollector = ResultCollector.new()
-		taskMan = TaskManagerAsync.new()
+		taskMan = TaskManagerAsync.new(4)
 		taskMan.addTask( TestTask.new( "thread1", resultCollector ) )
 		taskMan.addTask( TestTask.new( "thread2", resultCollector ) )
 		taskMan.addTask( TestTask.new( "thread3", resultCollector ) )
 		taskMan.addTask( TestTask.new( "thread4", resultCollector ) )
 
+		assert_equal true, taskMan.isRemainingTasks()
 		taskMan.executeAll()
+		assert_equal true, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
 		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
 
 		result = resultCollector.getResult()
 		assert_equal 4, result.length
@@ -47,7 +52,9 @@ class TestTaskManager < Minitest::Test
 		taskMan.addTask( TestTask.new( "thread4", resultCollector ) )
 
 		taskMan.executeAll()
+		assert_equal true, taskMan.isRunning()
 		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
 
 		result = resultCollector.getResult()
 		assert_equal 4, result.length
