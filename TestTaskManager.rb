@@ -39,6 +39,7 @@ class TestTaskManager < Minitest::Test
 		assert_equal false, taskMan.isRemainingTasks()
 
 		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
 		assert_equal 4, result.length
 	end
 
@@ -57,6 +58,25 @@ class TestTaskManager < Minitest::Test
 		assert_equal false, taskMan.isRunning()
 
 		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
+		assert_equal 4, result.length
+	end
+
+
+	def test_ThreadPoolWithResultCollectorHash
+		puts "test_ThreadPool"
+		resultCollector = ResultCollectorHash.new()
+		taskMan = ThreadPool.new()
+		taskMan.addTask( TestTask.new( "thread1", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread2", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread3", resultCollector ) )
+		taskMan.addTask( TestTask.new( "thread4", resultCollector ) )
+
+		taskMan.executeAll()
+		taskMan.finalize()
+
+		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Hash)
 		assert_equal 4, result.length
 	end
 end
