@@ -79,4 +79,38 @@ class TestTaskManager < Minitest::Test
 		assert_equal true, result.kind_of?(Hash)
 		assert_equal 4, result.length
 	end
+
+
+	def test_cancelThreadPool
+		puts "test_cancelThreadPool"
+		resultCollector = ResultCollector.new()
+		taskMan = ThreadPool.new(4)
+		task1 = TestTask.new( "thread1", resultCollector )
+		task2 = TestTask.new( "thread2", resultCollector )
+		task3 = TestTask.new( "thread3", resultCollector )
+		task4 = TestTask.new( "thread4", resultCollector )
+		taskMan.addTask( task1 )
+		taskMan.addTask( task2 )
+		taskMan.addTask( task3 )
+		taskMan.addTask( task4 )
+
+		taskMan.cancelTask( task1 )
+		assert_equal true, taskMan.isRemainingTasks()
+		taskMan.executeAll()
+		sleep 0.1
+		assert_equal true, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+		taskMan.cancelTask( task1 )
+		taskMan.cancelTask( task2 )
+		taskMan.cancelTask( task3 )
+		taskMan.cancelTask( task4 )
+		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+
+		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
+		assert_equal 3, result.length
+	end
+
 end
