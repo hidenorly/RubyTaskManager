@@ -8,6 +8,7 @@ class TestTask < TaskAsync
 		super("TestTask::#{id}")
 	end
 	def execute
+		sleep 0.1
 		@resultCollector.onResult( @id, @id )
 		_doneTask()
 	end
@@ -104,6 +105,35 @@ class TestTaskManager < Minitest::Test
 		taskMan.cancelTask( task2 )
 		taskMan.cancelTask( task3 )
 		taskMan.cancelTask( task4 )
+		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+
+		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
+		assert_equal 3, result.length
+	end
+
+
+	def test_cancelTaskManager
+		puts "test_cancelTaskManager"
+		resultCollector = ResultCollector.new()
+		taskMan = TaskManagerAsync.new(4)
+		task1 = TestTask.new( "thread1", resultCollector )
+		task2 = TestTask.new( "thread2", resultCollector )
+		task3 = TestTask.new( "thread3", resultCollector )
+		task4 = TestTask.new( "thread4", resultCollector )
+		taskMan.addTask( task1 )
+		taskMan.addTask( task2 )
+		taskMan.addTask( task3 )
+		taskMan.addTask( task4 )
+
+		taskMan.cancelTask( task1 )
+		assert_equal true, taskMan.isRemainingTasks()
+		taskMan.executeAll()
+		sleep 0.01
+		assert_equal true, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
 		taskMan.finalize()
 		assert_equal false, taskMan.isRunning()
 		assert_equal false, taskMan.isRemainingTasks()

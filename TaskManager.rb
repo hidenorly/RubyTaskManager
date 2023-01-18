@@ -85,7 +85,7 @@ class TaskManagerAsync < TaskManager
 	end
 
 	def cancelTask( aTask )
-#		@tasks.delete( aTask )
+		@tasks.delete( aTask )
 		@criticalSection.synchronize {
 			@currentRunningTasks = @currentRunningTasks - 1
 		}
