@@ -14,7 +14,6 @@ class TestTask < TaskAsync
 	end
 end
 
-
 class TestTaskManager < Minitest::Test
 	def setup
 	end
@@ -143,4 +142,22 @@ class TestTaskManager < Minitest::Test
 		assert_equal 3, result.length
 	end
 
+	def test_TaskManagerSync
+		puts "test_TaskManagerSync"
+
+		resultCollector = ResultCollector.new()
+		taskMan = TaskManager.new()
+		taskMan.addTask( TestTask.new( "id1", resultCollector ) )
+		taskMan.addTask( TestTask.new( "id2", resultCollector ) )
+		taskMan.addTask( TestTask.new( "id3", resultCollector ) )
+		taskMan.addTask( TestTask.new( "id4", resultCollector ) )
+		taskMan.executeAll()
+		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+
+		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
+		assert_equal 4, result.length
+	end
 end

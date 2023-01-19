@@ -23,9 +23,11 @@ class Task
 	def execute
 	end
 end
+
 class TaskManager
 	def initialize()
 		@tasks = []
+		@isRunning = false
 	end
 
 	def addTask(aTask)
@@ -33,10 +35,23 @@ class TaskManager
 	end
 
 	def executeAll
+		@isRunning = true
 		while !@tasks.empty? do
 			aTask = @tasks.pop()
 			aTask.execute()
 		end
+		@isRunning = false
+	end
+
+	def isRunning
+		return @isRunning
+	end
+
+	def isRemainingTasks
+		return @tasks.count > 0
+	end
+
+	def finalize
 	end
 end
 
