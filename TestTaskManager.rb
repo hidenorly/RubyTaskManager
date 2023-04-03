@@ -1,3 +1,19 @@
+#  Copyright (C) 2023 hidenorly
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# TaskManager and Task definitions
+
 require "minitest/autorun"
 require_relative "TaskManager"
 
@@ -97,7 +113,7 @@ class TestTaskManager < Minitest::Test
 		taskMan.cancelTask( task1 )
 		assert_equal true, taskMan.isRemainingTasks()
 		taskMan.executeAll()
-		sleep 0.1
+		sleep 0.01
 		assert_equal true, taskMan.isRunning()
 		assert_equal false, taskMan.isRemainingTasks()
 		taskMan.cancelTask( task1 )
@@ -141,6 +157,36 @@ class TestTaskManager < Minitest::Test
 		assert_equal true, result.kind_of?(Array)
 		assert_equal 3, result.length
 	end
+
+
+	def test_addTaskManagerInRunning
+		puts "test_addTaskManagerInRunning"
+		resultCollector = ResultCollector.new()
+		taskMan = TaskManagerAsync.new(4)
+		taskMan.addTask( TestTask.new( "task1", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task2", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task3", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task4", resultCollector ) )
+		assert_equal true, taskMan.isRemainingTasks()
+		taskMan.executeAll()
+		sleep 0.01
+		assert_equal true, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+		taskMan.addTask( TestTask.new( "task5", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task6", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task7", resultCollector ) )
+		taskMan.addTask( TestTask.new( "task8", resultCollector ) )
+		assert_equal true, taskMan.isRunning()
+		assert_equal true, taskMan.isRemainingTasks()
+		taskMan.finalize()
+		assert_equal false, taskMan.isRunning()
+		assert_equal false, taskMan.isRemainingTasks()
+
+		result = resultCollector.getResult()
+		assert_equal true, result.kind_of?(Array)
+		assert_equal 8, result.length
+	end
+
 
 	def test_TaskManagerSync
 		puts "test_TaskManagerSync"

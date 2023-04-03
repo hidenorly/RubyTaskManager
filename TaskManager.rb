@@ -23,11 +23,11 @@ class Task
 	def execute
 	end
 end
-
 class TaskManager
 	def initialize()
 		@tasks = []
 		@isRunning = false
+		@criticalSection = Mutex.new
 	end
 
 	def addTask(aTask)
@@ -35,12 +35,14 @@ class TaskManager
 	end
 
 	def executeAll
-		@isRunning = true
-		while !@tasks.empty? do
-			aTask = @tasks.pop()
-			aTask.execute()
-		end
-		@isRunning = false
+		@criticalSection.synchronize {
+			@isRunning = true
+			while !@tasks.empty? do
+				aTask = @tasks.pop()
+				aTask.execute()
+			end
+			@isRunning = false
+		}
 	end
 
 	def isRunning
@@ -89,7 +91,7 @@ class TaskManagerAsync < TaskManager
 		@numOfThread = numOfThread
 		@currentRunningTasks = 0
 		@threads = []
-		@criticalSection = Mutex.new
+		super()
 	end
 
 	def addTask(aTaskAsync)
@@ -245,7 +247,9 @@ class TaskExecutor
 					while(@isRunnable) do
 						@task = @taskPool.dequeue()
 						if @task!=nil then
+							@task.running = true
 							@task.execute()
+							@task.running = false
 						else
 							sleep 0.1
 						end
