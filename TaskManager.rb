@@ -1,4 +1,4 @@
-#  Copyright (C) 2021, 2022 hidenorly
+#  Copyright (C) 2021, 2022, 2023 hidenorly
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -216,6 +216,7 @@ class TaskPool
 
 	def erase(task)
 		@criticalSection.synchronize {
+			task.running = false if task
 			@tasks.delete(task)
 		}
 	end
@@ -263,6 +264,7 @@ class TaskExecutor
 
 	def terminate
 		@isRunnable = false
+		@task.running = false if @task
 		@criticalSection.synchronize {
 			if @thread != nil then
 				@thread.join
